@@ -7,7 +7,7 @@ namespace EzWnd {
 
 	struct Event {
 		UINT16 Trigger = 0x0000;
-		void (*Action)(HWND) = nullptr;
+		void (*Action)() = nullptr;
 	};
 
 	class Window {
@@ -17,7 +17,8 @@ namespace EzWnd {
 		Window();
 
 		int Init();
-		void Config(LPCTSTR WindowTitle);
+		void Name(LPCTSTR WindowTitle);
+		void Color(COLOR16 color);
 		void AddEvent(const Event& NewEvent);
 
 	private:
@@ -36,13 +37,20 @@ namespace EzWnd {
 			LPVOID lParam = NULL;
 
 			int nCmdShow;
-
+			HWND hwnd = {};
+			COLOR16 WindowColor = 0x0;
 		};
 
 		Wnd_info Wnd_i = {};
-		std::vector<Event> EventList;
+		std::vector<Event> EventList = { {WM_DESTROY, DestroyWindowFunction} };
 
 		static LRESULT CALLBACK WindowEvents(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
+
+		static void DestroyWindowFunction();
+
+
+		void SetBackGroundColor();
+		static void StaticSetBackGroundColor(HWND hwnd);
 
 	};
 

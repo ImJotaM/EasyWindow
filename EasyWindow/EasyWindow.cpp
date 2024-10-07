@@ -16,6 +16,8 @@ EzWnd::Window::Window() {
 		Wnd_i.nCmdShow = SW_SHOWDEFAULT;
 	}
 
+	EventList.push_back({WM_PAINT, StaticSetBackGroundColor});
+
 }
 
 int EzWnd::Window::Init() {
@@ -46,6 +48,8 @@ int EzWnd::Window::Init() {
 		return 0;
 	}
 
+	Wnd_i.hwnd = hwnd;
+
 	SetWindowLongPtr(hwnd, GWLP_USERDATA, reinterpret_cast<LONG_PTR>(this));
 
 	ShowWindow(hwnd, Wnd_i.nCmdShow);
@@ -60,8 +64,12 @@ int EzWnd::Window::Init() {
 	return 0;
 }
 
-void EzWnd::Window::Config(LPCTSTR WindowTitle) {
+void EzWnd::Window::Name(LPCTSTR WindowTitle) {
 	Wnd_i.WindowTitle = WindowTitle;
+}
+
+void EzWnd::Window::Color(COLOR16 color) {
+	Wnd_i.WindowColor = color;
 }
 
 void EzWnd::Window::AddEvent(const Event& NewEvent) {
@@ -78,9 +86,27 @@ LRESULT CALLBACK EzWnd::Window::WindowEvents(HWND hwnd, UINT uMsg, WPARAM wParam
 
 	for (int i = 0; i < pThis->EventList.size(); i++) {
 		if (uMsg == pThis->EventList[i].Trigger && pThis->EventList[i].Action) {
-			pThis->EventList[i].Action(hwnd);
+			pThis->EventList[i].Action();
 		}
 	}
 
 	return DefWindowProc(hwnd, uMsg, wParam, lParam);
+}
+
+void EzWnd::Window::DestroyWindowFunction() {
+	PostQuitMessage(0);
+}
+
+void EzWnd::Window::SetBackGroundColor() {
+	StaticSetBackGroundColor(Wnd_i.hwnd);
+}
+
+void EzWnd::Window::StaticSetBackGroundColor(HWND hwnd) {
+	
+	PAINTSTRUCT ps;
+	HDC hdc = BeginPaint(hwnd, &ps);
+
+	FillRect(hdc, &ps.rcPaint, (HBRUSH)(COLOR_WINDOW + 1));
+
+	EndPaint(hwnd, &ps);
 }
